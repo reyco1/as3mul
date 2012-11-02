@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application 
+	xmlns:fx		 = "http://ns.adobe.com/mxml/2009" 
+	xmlns:s			 = "library://ns.adobe.com/flex/spark" 
+	applicationDPI	 = "160"
+	creationComplete = "creationCompleteHandler(event)"
+>
+	<fx:Script>
+		<![CDATA[
+			import com.reyco1.multiuser.DirectLanConnection;
+			
+			import flash.sensors.Accelerometer;
+			
+			import mx.events.FlexEvent;
+			
+			private var connection:DirectLanConnection;
+			private var accel:Accelerometer;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				backBtn.enabled = false;
+				forwardBtn.enabled = false;
+				
+				Multitouch.inputMode = MultitouchInputMode.GESTURE;
+				Multitouch.mapTouchToMouse = true;
+			}
+			
+			protected function handleConnect(event:MouseEvent):void
+			{
+				if((connection && !connection.isConnected) || connection == null)
+				{
+					if(codeInput.text == "") return;
+					
+					connection = new DirectLanConnection();
+					connection.onConnect = handleConnectToService;
+					connection.onDataRecieve = handleGetObject
+					connection.connect(codeInput.text);
+				}
+				else
+				{
+					connection.close();
+					connectBtn.label = "Connect";
+				}
+			}
+			
+			protected function handleConnectToService(user:Object):void
+			{
+				accel = new Accelerometer();
+				accel.addEventListener(AccelerometerEvent.UPDATE, handleAccelUpdate);
+				connection.sendData("ready");
+				
+				backBtn.enabled 		= true;
+				forwardBtn.enabled 		= true;				
+				connectingLabel.text 	= "Connected!";				
+				connectBtn.label 		= "Disconnect";
+			}
+			
+			protected function handleGetObject(user:Object):void
+			{
+				// nothing here for now, meaybe we can add a speedometer for the car or a gas gauge?
+			}
+			
+			protected function handleAccelUpdate(evt:AccelerometerEvent):void
+			{
+				var aX:Number = evt.accelerationX;
+				var aY:Number = evt.accelerationY;
+				var aZ:Number = evt.accelerationZ;
+				
+				connection.sendData( {type:"rotation", angle:Math.round(aX * 100)} );
+			}
+			
+			protected function handleForwardClick(event:MouseEvent):void
+			{
+				connection.sendData( {type:"forward_press"} );
+			}
+			
+			protected function handleBackClick(event:MouseEvent):void
+			{
+				connection.sendData( {type:"back_press"} );
+			}
+			
+			protected function handleForwardRelease(event:MouseEvent):void
+			{
+				connection.sendData( {type:"forward_release"} );
+			}
+			
+			protected function handleBackRelease(event:MouseEvent):void
+			{
+				connection.sendData( {type:"back_release"} );
+			}
+			
+			protected function handlExitApp(event:MouseEvent):void
+			{
+				connection.close();
+				NativeApplication.nativeApplication.exit();
+			}
+			
+			protected function onToggleZoom(event:Event):void
+			{
+				connection.sendData( {type:"zoom", value:zoomSwitch.selected} );
+			}
+			
+			protected function onLapPanelToggle(event:Event):void
+			{
+				connection.sendData( {type:"lapPanel", value:lapSwitch.selected} );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup left="9" top="9" bottom="10">
+		<s:Button id="forwardBtn" x="10" y="10" width="186" height="50%" label="Forward"
+				  mouseDown="handleForwardClick(event)" mouseUp="handleForwardRelease(event)"/>
+		<s:Button id="backBtn" width="186" height="50%" label="Back" mouseDown="handleBackClick(event)" mouseUp="handleBackRelease(event)"/>
+	</s:VGroup>	
+	<s:VGroup left="204" right="10" top="10" bottom="9">
+		<s:Label width="100%"
+				 text="Enter the code provided by the game and click the connect button! Once connected, you can use your device as a steering wheel :)"/>
+		<s:VGroup width="100%">
+			<s:TextInput id="codeInput" x="204" y="72" width="75%" height="50"/>
+			<s:HGroup verticalAlign="middle">
+				<s:Button id="connectBtn" width="154" height="50" label="Connect"
+						  mouseDown="handleConnect(event)"/>
+				<s:Label id="connectingLabel" text="Not connected."/>
+				<s:BusyIndicator visible="false" id="busyCursor" x="204" y="126"/>
+			</s:HGroup>
+		</s:VGroup>
+		<s:HGroup width="296" height="54">
+			<s:VGroup width="107" height="54">
+				<s:Label text="Zoom"/>
+				<s:ToggleSwitch id="zoomSwitch" change="onToggleZoom(event)"/>
+			</s:VGroup>
+			<s:VGroup width="107" height="54">
+				<s:Label text="Lap Panel"/>
+				<s:ToggleSwitch id="lapSwitch" change="onLapPanelToggle(event)"/>
+			</s:VGroup>
+		</s:HGroup>
+		<s:Button id="exitButton" width="154" label="Exit Controller" click="handlExitApp(event)"/>
+	</s:VGroup>
+	<s:ToggleSwitch x="-218" y="346"/>
+	
+</s:Application>
