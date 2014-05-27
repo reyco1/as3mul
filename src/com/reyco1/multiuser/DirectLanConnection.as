@@ -43,7 +43,7 @@ package com.reyco1.multiuser
 		}
 		
 		/**
-		 * Establishes a direct connection. If the connectionPortId is privided, then the connection will be established over wifi the other instance of DirectLanConnection on that port.
+		 * Establishes a direct connection. If the connectionPortId is provided, then the connection will be established over wifi the other instance of DirectLanConnection on that port.
 		 * If the argument is not provided, then this instance will be connected to a random port and the "port" property will be set.
 		 * @param connectionPortId
 		 * 

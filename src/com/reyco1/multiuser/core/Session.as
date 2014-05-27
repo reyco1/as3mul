@@ -1,13 +1,17 @@
 package com.reyco1.multiuser.core
 {
 	import com.reyco1.multiuser.debug.Logger;
+	import com.reyco1.multiuser.events.FileShareEvent;
 	import com.reyco1.multiuser.events.P2PDispatcher;
 	import com.reyco1.multiuser.events.UserStatusEvent;
+	import com.reyco1.multiuser.filesharing.P2PFileSharer;
 	import com.reyco1.multiuser.group.ChatGroup;
 	
+	import flash.events.Event;
 	import flash.events.NetStatusEvent;
 	import flash.net.GroupSpecifier;
 	import flash.net.NetConnection;
+	import flash.net.NetGroupReplicationStrategy;
 	
 	/**
 	 * Manages and controls the connection session, NetConnection instance and the ChatGroup instance.
@@ -17,7 +21,7 @@ package com.reyco1.multiuser.core
 	public class Session
 	{
 		/**
-		 *NetConnection instanceused in this session 
+		 *NetConnection instance used in this session 
 		 */		
 		public  var connection:NetConnection;
 		/**
@@ -32,6 +36,8 @@ package com.reyco1.multiuser.core
 		 *A reference to your user object (if specified) 
 		 */		
 		public  var userDetails:Object;
+		
+		public  var fileSharer:P2PFileSharer;
 		
 		private var serverAddress:String;
 		private var groupName:String;
@@ -52,10 +58,11 @@ package com.reyco1.multiuser.core
 			this.groupName 	   = groupName;
 			
 			groupspec = new GroupSpecifier(groupName);
-			groupspec.multicastEnabled		= true;
-			groupspec.postingEnabled 		= true;
-			groupspec.serverChannelEnabled 	= true;
-			groupspec.routingEnabled 		= true;
+			groupspec.objectReplicationEnabled 	= true;
+			groupspec.multicastEnabled			= true;
+			groupspec.postingEnabled 			= true;
+			groupspec.serverChannelEnabled 		= true;
+			groupspec.routingEnabled 			= true;
 			
 			Logger.log("group specs with auth", this);
 		}
@@ -104,6 +111,14 @@ package com.reyco1.multiuser.core
 			
 			group = new ChatGroup(connection, groupspec.groupspecWithAuthorizations(), userName, userDetails);
 			group.addEventListener(NetStatusEvent.NET_STATUS, handleNetStatusEvent);
+			
+			fileSharer = new P2PFileSharer( group );
+			fileSharer.addEventListener( Event.COMPLETE, handleFileTransferReceived );
+		}
+		
+		protected function handleFileTransferReceived(event:Event):void
+		{
+			P2PDispatcher.dispatchEvent( new FileShareEvent(FileShareEvent.RECIEVE, fileSharer.p2pSharedObject) );
 		}
 		
 		/**

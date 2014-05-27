@@ -11,6 +11,7 @@ package com.reyco1.multiuser.group
 	import flash.events.TimerEvent;
 	import flash.net.NetConnection;
 	import flash.net.NetGroup;
+	import flash.net.NetGroupReplicationStrategy;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
@@ -86,6 +87,10 @@ package com.reyco1.multiuser.group
 			
 			switch(event.info.code)
 			{
+				case "NetGroup.Connect.Success":
+					replicationStrategy = NetGroupReplicationStrategy.LOWEST_FIRST;
+					break;
+				
 				case "NetGroup.Neighbor.Connect":
 					if(!neighbored)
 					{
@@ -122,7 +127,7 @@ package com.reyco1.multiuser.group
 		
 		protected function requestUserList(neighborID:String):void
 		{
-			Logger.log("user list requested", this);
+			//Logger.log("user list requested", this);
 			
 			var request:ListRoutingObject = new ListRoutingObject();
 			request.destination			  = neighborID;
@@ -138,7 +143,7 @@ package com.reyco1.multiuser.group
 			{
 				if(info.message.type == ListRoutingObject.REQEUST)
 				{
-					Logger.log("responding to user list request", this);
+					//Logger.log("responding to user list request", this);
 					
 					var response:ListRoutingObject 	= new ListRoutingObject();
 					response.type 		 			= ListRoutingObject.RESPONSE;
@@ -151,7 +156,7 @@ package com.reyco1.multiuser.group
 				
 				if(info.message.type == ListRoutingObject.RESPONSE)
 				{
-					Logger.log("user list recieved", this);
+					//Logger.log("user list recieved", this);
 					
 					var users:Object 		 = info.message.userList;
 					var neighborsTime:Number = info.message.time;
@@ -189,14 +194,14 @@ package com.reyco1.multiuser.group
 			}
 			else if(!info.fromLocal)
 			{
-				Logger.log("routing user list request", this);
+				//Logger.log("routing user list request", this);
 				sendToNearest(info.message, info.message.destination);
 			}
 		}
 		
 		protected function resolveUserKeepAliveRequest(user:Object):void
 		{
-			Logger.log("resolving keep alive request", this);
+			//Logger.log("resolving keep alive request", this);
 			
 			user.stamp = getTimer();
 			
@@ -219,7 +224,7 @@ package com.reyco1.multiuser.group
 		
 		protected function initializeTimers():void
 		{
-			Logger.log("initializing expired and alive timers", this);
+			//Logger.log("initializing expired and alive timers", this);
 			
 			keepAliveTimer = new Timer( KEEP_ALIVE_INTERVAL );
 			keepAliveTimer.addEventListener(TimerEvent.TIMER, announceSelf);
@@ -232,7 +237,7 @@ package com.reyco1.multiuser.group
 		
 		protected function announceSelf(event:TimerEvent = null):void
 		{
-			Logger.log("announcing self", this);
+			//Logger.log("announcing self", this);
 			
 			var keepAliveObject:KeepAliveObject = new KeepAliveObject();
 			keepAliveObject.serialNumber = getTimer();
@@ -249,7 +254,7 @@ package com.reyco1.multiuser.group
 		
 		protected function invalidateUserList(event:TimerEvent = null):void
 		{
-			Logger.log("invalidating user list", this);
+			//Logger.log("invalidating user list", this);
 			
 			var currentTimeStamp:int = getTimer();
 			var userAge:int = 0;
@@ -278,10 +283,12 @@ package com.reyco1.multiuser.group
 		
 		protected function createOwnUser(event:NetStatusEvent):void
 		{
-			Logger.log("joined. creating own user", this);
+			//Logger.log("joined. creating own user", this);
 			
 			if(event.info.code == "NetGroup.Connect.Success")
 			{
+				replicationStrategy = NetGroupReplicationStrategy.LOWEST_FIRST;
+				
 				(event.target as NetConnection).removeEventListener(NetStatusEvent.NET_STATUS, createOwnUser);
 				
 				myUser 			= new UserObject();

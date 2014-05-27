@@ -3,11 +3,8 @@ package com.reyco1.multiuser.channel
 	import com.reyco1.multiuser.core.Session;
 	
 	import flash.events.EventDispatcher;
-	import flash.events.IEventDispatcher;
-	import flash.events.NetStatusEvent;
 	import flash.media.Camera;
 	import flash.media.Microphone;
-	import flash.media.Video;
 	import flash.net.NetStream;
 	
 	/**

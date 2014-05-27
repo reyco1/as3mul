@@ -27,12 +27,11 @@ package com.reyco1.multiuser.group
 		public function ChatGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object)
 		{
 			super(connection, groupspec, userName, userDetails);
-			addEventListener(NetStatusEvent.NET_STATUS, handleNetStatus);
 		}
 		
-		protected function handleNetStatus(event:NetStatusEvent):void
+		override protected function netStatusHandler(event:NetStatusEvent):void
 		{
-			Logger.log(event.info.code, this, true);
+			super.netStatusHandler( event );
 			
 			switch (event.info.code)
 			{
@@ -80,6 +79,7 @@ package com.reyco1.multiuser.group
 			{
 				post(message);
 			}
+			
 			P2PDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
 		}
 		
