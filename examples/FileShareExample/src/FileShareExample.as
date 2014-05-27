@@ -18,6 +18,9 @@ package
 		private var receiveButton:PushButton;
 		private var loader:Loader;
 		
+		// you can get a key from here : http://labs.adobe.com/technologies/cirrus/
+		private var SERVER_KEY:String = "";
+		
 		public function FileShareExample()
 		{
 			Logger.LEVEL = Logger.ALL_BUT_NET_STATUS;
@@ -27,7 +30,7 @@ package
 		private function initialize():void
 		{
 			// connect normally
-			connection = new MultiUserSession("rtmfp://p2p.rtmfp.net/3fea0a54d9024ae0d8da243c-d17151e919f8/", "multiuser.share.test");
+			connection = new MultiUserSession(SERVER_KEY, "multiuser.share.test");
 			
 			// listen for when we connect
 			connection.onConnect = handleConnect;

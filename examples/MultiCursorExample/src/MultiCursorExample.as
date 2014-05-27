@@ -11,7 +11,7 @@ package
 	public class MultiCursorExample extends Sprite
 	{
 		// you can get a key from here : http://labs.adobe.com/technologies/cirrus/
-		private const SERVER_AND_KEY:String   = "rtmfp://p2p.rtmfp.net/3fea0a54d9024ae0d8da243c-d17151e919f8/";										
+		private const SERVER_AND_KEY:String   = "";										
 		
 		private var connection:MultiUserSession;
 		private var cursors:Object = {};
