@@ -122,7 +122,7 @@ package com.reyco1.multiuser.core
 		}
 		
 		/**
-		 *Closes the connectionand sets the NetConnection instance to null 
+		 * Closes the connection, sets the NetConnection instance to null, removes related EventListeners, and closes the associated UserGroup 
 		 * 
 		 */		
 		public function close():void
@@ -131,6 +131,12 @@ package com.reyco1.multiuser.core
 			
 			connection.close();
 			connection = null;
+			
+			if (group)
+			{
+				group.removeEventListener(NetStatusEvent.NET_STATUS, handleNetStatusEvent);
+				group.close();
+			}
 		}
 	}
 }

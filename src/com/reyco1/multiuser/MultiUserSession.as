@@ -146,11 +146,20 @@ package com.reyco1.multiuser
 		}
 		
 		/**
-		 * Closes the connection 
+		 * Closes the connection and removes all associated Event Listeners.
 		 * 
 		 */		
 		public function close():void
 		{
+			P2PDispatcher.removeEventListener(ChatMessageEvent.RECIEVE		, handleChatMessage);
+			P2PDispatcher.removeEventListener(UserStatusEvent.CONNECTED		, handleConnect);
+			P2PDispatcher.removeEventListener(UserStatusEvent.DISCONNECTED	, handleClose);
+			P2PDispatcher.removeEventListener(UserStatusEvent.USER_ADDED	, handleUserAdded);
+			P2PDispatcher.removeEventListener(UserStatusEvent.USER_REMOVED	, handleUserRemoved);
+			P2PDispatcher.removeEventListener(UserStatusEvent.USER_EXPIRED	, handleUserExpired);
+			P2PDispatcher.removeEventListener(UserStatusEvent.USER_IDLE		, handleUserIdle);
+			Logger.log("global listeners removed", this);
+			
 			session.close();
 		}
 		
