@@ -49,6 +49,11 @@ package com.reyco1.multiuser.group
 		 */		
 		public var userList:Object;
 		
+		/**
+		 * The connection the UserGroup was created with
+		 */
+		private var connection:NetConnection;
+		
 		protected var userName:String;
 		protected var userDetails:Object;		
 		protected var nearID:String;
@@ -79,6 +84,35 @@ package com.reyco1.multiuser.group
 			
 			connection.addEventListener(NetStatusEvent.NET_STATUS, createOwnUser);
 			addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			
+			//Store connection for EventListener removal.
+			this.connection = connection;
+		}
+		
+		/**
+		 * Remove all EventListeners and stop timers.
+		 * 
+		 */		
+		override public function close():void
+		{
+			connection.removeEventListener(NetStatusEvent.NET_STATUS, createOwnUser);
+			removeEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			
+			if (keepAliveTimer)
+			{
+				keepAliveTimer.stop();
+				keepAliveTimer.removeEventListener(TimerEvent.TIMER, announceSelf);
+			}
+			
+			if (expiredTimer)
+			{
+				expiredTimer.stop();
+				expiredTimer.removeEventListener(TimerEvent.TIMER, invalidateUserList);
+			}
+			
+			connection = null;
+			
+			super.close();
 		}
 		
 		protected function netStatusHandler(event:NetStatusEvent):void
