@@ -4,8 +4,8 @@ package com.reyco1.multiuser.group
 	import com.reyco1.multiuser.data.UserObject;
 	import com.reyco1.multiuser.debug.Logger;
 	import com.reyco1.multiuser.events.ChatMessageEvent;
-	import com.reyco1.multiuser.events.P2PDispatcher;
 	
+	import flash.events.EventDispatcher;
 	import flash.events.NetStatusEvent;
 	import flash.net.NetConnection;
 	
@@ -23,10 +23,13 @@ package com.reyco1.multiuser.group
 		 * @param userName
 		 * @param userDetails
 		 * 
-		 */		
-		public function ChatGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object)
+		 */	
+		
+		private var p2pDispatcher:EventDispatcher;
+		
+		public function ChatGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object, p2pDispatcher:EventDispatcher)
 		{
-			super(connection, groupspec, userName, userDetails);
+			super(connection, groupspec, userName, userDetails,p2pDispatcher);
 		}
 		
 		override protected function netStatusHandler(event:NetStatusEvent):void
@@ -80,7 +83,7 @@ package com.reyco1.multiuser.group
 				post(message);
 			}
 			
-			P2PDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
+			p2pDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
 		}
 		
 		protected function receiveMessage(msg:Object):void
@@ -92,11 +95,11 @@ package com.reyco1.multiuser.group
 			if(message.destination != null)
 			{
 				message.pm = true;
-				P2PDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
+				p2pDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
 			}
 			else
 			{
-				P2PDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
+				p2pDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
 			}
 		}
 	}
