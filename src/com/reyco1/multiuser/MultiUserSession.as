@@ -87,6 +87,7 @@ package com.reyco1.multiuser
 		 */
 		public function connect(userName:String, userDetails:Object = null):void
 		{
+
 			p2pDispatcher.addEventListener(ChatMessageEvent.RECIEVE				, handleChatMessage);
 			p2pDispatcher.addEventListener(UserStatusEvent.CONNECTED			, handleConnect);
 			p2pDispatcher.addEventListener(UserStatusEvent.DISCONNECTED			, handleClose);
@@ -182,6 +183,7 @@ package com.reyco1.multiuser
 		
 		protected function handleUserAdded(event:UserStatusEvent):void
 		{			
+	
 			Logger.log("user added: " + event.user.name , this);
 			if(event.user.id != myUser.id)
 			{

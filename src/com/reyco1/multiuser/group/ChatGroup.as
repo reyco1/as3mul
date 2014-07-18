@@ -24,12 +24,10 @@ package com.reyco1.multiuser.group
 		 * @param userDetails
 		 * 
 		 */	
-		
-		private var p2pDispatcher:EventDispatcher;
-		
+
 		public function ChatGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object, p2pDispatcher:EventDispatcher)
 		{
-			super(connection, groupspec, userName, userDetails,p2pDispatcher);
+			super(connection, groupspec, userName, userDetails, p2pDispatcher);
 		}
 		
 		override protected function netStatusHandler(event:NetStatusEvent):void
@@ -82,7 +80,7 @@ package com.reyco1.multiuser.group
 			{
 				post(message);
 			}
-			
+
 			p2pDispatcher.dispatchEvent(new ChatMessageEvent(ChatMessageEvent.RECIEVE, message));
 		}
 		

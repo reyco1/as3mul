@@ -53,7 +53,7 @@ package com.reyco1.multiuser.group
 		 * The connection the UserGroup was created with
 		 */
 		private var connection:NetConnection;
-		private var p2pDispatcher:EventDispatcher;
+		protected var p2pDispatcher:EventDispatcher;
 		
 		protected var userName:String;
 		protected var userDetails:Object;		
@@ -83,6 +83,7 @@ package com.reyco1.multiuser.group
 			this.userDetails = userDetails;
 			this.neighbored	 = false;
 			this.p2pDispatcher = p2pDispatcher;
+			
 			
 			connection.addEventListener(NetStatusEvent.NET_STATUS, createOwnUser);
 			addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
