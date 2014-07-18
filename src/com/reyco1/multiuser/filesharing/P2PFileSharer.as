@@ -2,7 +2,6 @@ package com.reyco1.multiuser.filesharing
 {
 	import com.reyco1.multiuser.debug.Logger;
 	import com.reyco1.multiuser.events.FileShareEvent;
-	import com.reyco1.multiuser.events.P2PDispatcher;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -18,9 +17,12 @@ package com.reyco1.multiuser.filesharing
 		public var localFileLoader:LocalFileLoader;
 		public var p2pSharedObject:P2PSharedObject;
 		
-		public function P2PFileSharer(group:NetGroup)
+		private var p2pDispatcher:EventDispatcher
+		
+		public function P2PFileSharer(group:NetGroup,p2pDispatcher:EventDispatcher)
 		{
 			netGroup = group;
+			this.p2pDispatcher = p2pDispatcher;
 			netGroup.addEventListener(NetStatusEvent.NET_STATUS, netStatus);
 		}
 		
@@ -41,7 +43,7 @@ package com.reyco1.multiuser.filesharing
 		{
 			localFileLoader.removeEventListener(Event.COMPLETE, handleFileReady);
 			
-			P2PDispatcher.dispatchEvent( new FileShareEvent(FileShareEvent.FILE_TO_SHARE_READY, localFileLoader.p2pSharedObject, localFileLoader.file) );
+			p2pDispatcher.dispatchEvent( new FileShareEvent(FileShareEvent.FILE_TO_SHARE_READY, localFileLoader.p2pSharedObject, localFileLoader.file) );
 			
 			if(autoShare)
 			{

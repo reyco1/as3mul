@@ -6,8 +6,8 @@ package com.reyco1.multiuser
 	import com.reyco1.multiuser.debug.Logger;
 	import com.reyco1.multiuser.events.ChatMessageEvent;
 	import com.reyco1.multiuser.events.FileShareEvent;
-	import com.reyco1.multiuser.events.P2PDispatcher;
 	import com.reyco1.multiuser.events.UserStatusEvent;
+	import flash.events.EventDispatcher;
 	
 	/**
 	 * A Facade for the Session, ChannelManager and ChatGroup instances for this session
@@ -60,6 +60,8 @@ package com.reyco1.multiuser
 		public var onFileReceived	:Function;
 		public var onFileReady		:Function;
 		
+		private var p2pDispatcher:EventDispatcher = new EventDispatcher;
+		
 		private var serverAddress	:String;
 		private var groupName		:String;
 		
@@ -85,18 +87,19 @@ package com.reyco1.multiuser
 		 */
 		public function connect(userName:String, userDetails:Object = null):void
 		{
-			P2PDispatcher.addEventListener(ChatMessageEvent.RECIEVE				, handleChatMessage);
-			P2PDispatcher.addEventListener(UserStatusEvent.CONNECTED			, handleConnect);
-			P2PDispatcher.addEventListener(UserStatusEvent.DISCONNECTED			, handleClose);
-			P2PDispatcher.addEventListener(UserStatusEvent.USER_ADDED			, handleUserAdded);
-			P2PDispatcher.addEventListener(UserStatusEvent.USER_REMOVED			, handleUserRemoved);
-			P2PDispatcher.addEventListener(UserStatusEvent.USER_EXPIRED			, handleUserExpired);
-			P2PDispatcher.addEventListener(UserStatusEvent.USER_IDLE			, handleUserIdle);
-			P2PDispatcher.addEventListener(FileShareEvent.RECIEVE				, handleFileReceived);
-			P2PDispatcher.addEventListener(FileShareEvent.FILE_TO_SHARE_READY	, handleFileReadyToShare);
+
+			p2pDispatcher.addEventListener(ChatMessageEvent.RECIEVE				, handleChatMessage);
+			p2pDispatcher.addEventListener(UserStatusEvent.CONNECTED			, handleConnect);
+			p2pDispatcher.addEventListener(UserStatusEvent.DISCONNECTED			, handleClose);
+			p2pDispatcher.addEventListener(UserStatusEvent.USER_ADDED			, handleUserAdded);
+			p2pDispatcher.addEventListener(UserStatusEvent.USER_REMOVED			, handleUserRemoved);
+			p2pDispatcher.addEventListener(UserStatusEvent.USER_EXPIRED			, handleUserExpired);
+			p2pDispatcher.addEventListener(UserStatusEvent.USER_IDLE			, handleUserIdle);
+			p2pDispatcher.addEventListener(FileShareEvent.RECIEVE				, handleFileReceived);
+			p2pDispatcher.addEventListener(FileShareEvent.FILE_TO_SHARE_READY	, handleFileReadyToShare);
 			Logger.log("global listeners added", this);	
 			
-			session = new Session(serverAddress, groupName);
+			session = new Session(serverAddress, groupName,p2pDispatcher);
 			session.connect(userName, userDetails);
 		}
 		
@@ -151,13 +154,13 @@ package com.reyco1.multiuser
 		 */		
 		public function close():void
 		{
-			P2PDispatcher.removeEventListener(ChatMessageEvent.RECIEVE		, handleChatMessage);
-			P2PDispatcher.removeEventListener(UserStatusEvent.CONNECTED		, handleConnect);
-			P2PDispatcher.removeEventListener(UserStatusEvent.DISCONNECTED	, handleClose);
-			P2PDispatcher.removeEventListener(UserStatusEvent.USER_ADDED	, handleUserAdded);
-			P2PDispatcher.removeEventListener(UserStatusEvent.USER_REMOVED	, handleUserRemoved);
-			P2PDispatcher.removeEventListener(UserStatusEvent.USER_EXPIRED	, handleUserExpired);
-			P2PDispatcher.removeEventListener(UserStatusEvent.USER_IDLE		, handleUserIdle);
+			p2pDispatcher.removeEventListener(ChatMessageEvent.RECIEVE		, handleChatMessage);
+			p2pDispatcher.removeEventListener(UserStatusEvent.CONNECTED		, handleConnect);
+			p2pDispatcher.removeEventListener(UserStatusEvent.DISCONNECTED	, handleClose);
+			p2pDispatcher.removeEventListener(UserStatusEvent.USER_ADDED	, handleUserAdded);
+			p2pDispatcher.removeEventListener(UserStatusEvent.USER_REMOVED	, handleUserRemoved);
+			p2pDispatcher.removeEventListener(UserStatusEvent.USER_EXPIRED	, handleUserExpired);
+			p2pDispatcher.removeEventListener(UserStatusEvent.USER_IDLE		, handleUserIdle);
 			Logger.log("global listeners removed", this);
 			
 			session.close();
@@ -180,6 +183,7 @@ package com.reyco1.multiuser
 		
 		protected function handleUserAdded(event:UserStatusEvent):void
 		{			
+	
 			Logger.log("user added: " + event.user.name , this);
 			if(event.user.id != myUser.id)
 			{

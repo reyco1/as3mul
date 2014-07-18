@@ -4,9 +4,9 @@ package com.reyco1.multiuser.group
 	import com.reyco1.multiuser.data.ListRoutingObject;
 	import com.reyco1.multiuser.data.UserObject;
 	import com.reyco1.multiuser.debug.Logger;
-	import com.reyco1.multiuser.events.P2PDispatcher;
 	import com.reyco1.multiuser.events.UserStatusEvent;
 	
+	import flash.events.EventDispatcher;
 	import flash.events.NetStatusEvent;
 	import flash.events.TimerEvent;
 	import flash.net.NetConnection;
@@ -53,6 +53,7 @@ package com.reyco1.multiuser.group
 		 * The connection the UserGroup was created with
 		 */
 		private var connection:NetConnection;
+		protected var p2pDispatcher:EventDispatcher;
 		
 		protected var userName:String;
 		protected var userDetails:Object;		
@@ -73,7 +74,7 @@ package com.reyco1.multiuser.group
 		 * @param userDetails
 		 * 
 		 */		
-		public function UserGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object)
+		public function UserGroup(connection:NetConnection, groupspec:String, userName:String, userDetails:Object, p2pDispatcher:EventDispatcher)
 		{
 			super(connection, groupspec);
 			
@@ -81,6 +82,8 @@ package com.reyco1.multiuser.group
 			this.userName 	 = userName;
 			this.userDetails = userDetails;
 			this.neighbored	 = false;
+			this.p2pDispatcher = p2pDispatcher;
+			
 			
 			connection.addEventListener(NetStatusEvent.NET_STATUS, createOwnUser);
 			addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
@@ -148,7 +151,7 @@ package com.reyco1.multiuser.group
 						{
 							var temp:UserObject = userList[user];
 							delete userList[user];
-							P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_REMOVED, temp));
+							p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_REMOVED, temp));
 						}
 					}
 					break;
@@ -212,7 +215,7 @@ package com.reyco1.multiuser.group
 							
 							userList[user] = temp;
 							
-							P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_ADDED, temp));
+							p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_ADDED, temp));
 						}
 						else
 						{
@@ -250,7 +253,7 @@ package com.reyco1.multiuser.group
 				
 				userList[user.id] = temp;
 				
-				P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_ADDED, temp));
+				p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_ADDED, temp));
 			}
 			
 			userList[user.id].stamp = getTimer();
@@ -302,14 +305,14 @@ package com.reyco1.multiuser.group
 				
 				if(userAge > EXPIRE_TIMEOUT)
 				{
-					P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_EXPIRED, userList[user]));
+					p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_EXPIRED, userList[user]));
 					delete userList[user];
 					continue;
 				}
 				
 				if(userAge > IDEL_TIMEOUT)
 				{
-					P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_IDLE, userList[user]));
+					p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.USER_IDLE, userList[user]));
 					continue;
 				}
 			}
@@ -335,7 +338,7 @@ package com.reyco1.multiuser.group
 				
 				userList[nearID] = myUser;
 				
-				P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.CONNECTED, userList[nearID]));
+				p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.CONNECTED, userList[nearID]));
 			}
 		}		
 		

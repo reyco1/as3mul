@@ -2,16 +2,15 @@ package com.reyco1.multiuser.core
 {
 	import com.reyco1.multiuser.debug.Logger;
 	import com.reyco1.multiuser.events.FileShareEvent;
-	import com.reyco1.multiuser.events.P2PDispatcher;
 	import com.reyco1.multiuser.events.UserStatusEvent;
 	import com.reyco1.multiuser.filesharing.P2PFileSharer;
 	import com.reyco1.multiuser.group.ChatGroup;
 	
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.NetStatusEvent;
 	import flash.net.GroupSpecifier;
 	import flash.net.NetConnection;
-	import flash.net.NetGroupReplicationStrategy;
 	
 	/**
 	 * Manages and controls the connection session, NetConnection instance and the ChatGroup instance.
@@ -44,18 +43,21 @@ package com.reyco1.multiuser.core
 		private var groupspec:GroupSpecifier;
 		private var isWifiOnly:Boolean;
 		
+		private var p2pDispatcher:EventDispatcher
+		
 		/**
 		 * Creates a new instance of the Session class 
 		 * @param serverAddress
 		 * @param groupName
 		 * 
 		 */		
-		public function Session(serverAddress:String, groupName:String)
+		public function Session(serverAddress:String, groupName:String,p2pDispatcher:EventDispatcher)
 		{
 			super();
 			
 			this.serverAddress = serverAddress;
 			this.groupName 	   = groupName;
+			this.p2pDispatcher = p2pDispatcher;
 			
 			groupspec = new GroupSpecifier(groupName);
 			groupspec.objectReplicationEnabled 	= true;
@@ -88,7 +90,7 @@ package com.reyco1.multiuser.core
 		protected function handleNetStatusEvent(event:NetStatusEvent):void
 		{
 			Logger.log(event.info.code, this, true);
-			
+
 			switch(event.info.code)
 			{
 				case "NetConnection.Connect.Success":					
@@ -100,7 +102,7 @@ package com.reyco1.multiuser.core
 				case "NetConnection.Connect.AppShutdown":
 				case "NetConnection.Connect.InvalidApp":
 				case "NetConnection.Connect.Closed":					
-					P2PDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.DISCONNECTED));					
+					p2pDispatcher.dispatchEvent(new UserStatusEvent(UserStatusEvent.DISCONNECTED));					
 					break;
 			}
 		}
@@ -109,16 +111,16 @@ package com.reyco1.multiuser.core
 		{
 			Logger.log("connected. joining group...", this);
 			
-			group = new ChatGroup(connection, groupspec.groupspecWithAuthorizations(), userName, userDetails);
+			group = new ChatGroup(connection, groupspec.groupspecWithAuthorizations(), userName, userDetails, p2pDispatcher);
 			group.addEventListener(NetStatusEvent.NET_STATUS, handleNetStatusEvent);
 			
-			fileSharer = new P2PFileSharer( group );
+			fileSharer = new P2PFileSharer( group , p2pDispatcher);
 			fileSharer.addEventListener( Event.COMPLETE, handleFileTransferReceived );
 		}
 		
 		protected function handleFileTransferReceived(event:Event):void
 		{
-			P2PDispatcher.dispatchEvent( new FileShareEvent(FileShareEvent.RECIEVE, fileSharer.p2pSharedObject) );
+			p2pDispatcher.dispatchEvent( new FileShareEvent(FileShareEvent.RECIEVE, fileSharer.p2pSharedObject) );
 		}
 		
 		/**
